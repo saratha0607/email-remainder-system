@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Reminder System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 450px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      color: #555;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 6px;
+      font-size: 15px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 20px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .success {
+      color: green;
+      text-align: center;
+      margin-top: 15px;
+    }
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Email Reminder System</h2>
+    <form id="reminderForm">
+      <label for="email">Recipient Email</label>
+      <input type="email" id="email" required placeholder="example@email.com" />
+
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" required placeholder="Meeting Reminder" />
+
+      <label for="message">Message</label>
+      <textarea id="message" required placeholder="Don't forget our meeting at 3PM!"></textarea>
+
+      <label for="time">Send After (minutes)</label>
+      <input type="number" id="time" required min="1" placeholder="5" />
+
+      <button type="submit">Schedule Reminder</button>
+    </form>
+
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('reminderForm');
+    const statusText = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusText.textContent = 'Scheduling reminder...';
+      statusText.className = '';
+
+      const data = {
+        email: document.getElementById('email').value,
+        subject: document.getElementById('subject').value,
+        message: document.getElementById('message').value,
+        time: document.getElementById('time').value
+      };
+
+      try {
+        // Call Node.js backend
+        const res = await fetch('http://localhost:3000/sendReminder', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+        if (result.success) {
+          statusText.textContent = '✅ Reminder scheduled successfully!';
+          statusText.className = 'success';
+          form.reset();
+        } else {
+          throw new Error(result.message || 'Failed to schedule reminder.');
+        }
+      } catch (err) {
+        statusText.textContent = '❌ ' + err.message;
+        statusText.className = 'error';
+      }
+    });
+  </script>
+
+</body>
+</html>
